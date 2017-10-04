@@ -1,0 +1,17 @@
+{
+  "name": "XLSX_WORKBOOK_CREATE",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "./app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.15.4",
+    "fs": "~0.0.1",
+    "path": "^0.12.7",
+    "uniqid": "^4.1.1",
+    "xlsx": "^0.11.5",
+    "xlsx-style": "^0.8.13"
+  }
+}
