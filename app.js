@@ -18,9 +18,7 @@ app.get('/', function (req, res) {
     try {
         var body = JSON.parse(fs.readFileSync(path.join(__dirname, '/data.json')));
         var columns = body.columns;
-        console.log("columns=", columns);
         var rows = body.rows;
-        console.log("rows=", rows);
     } catch (e) {
         res.sendStatus(500);
         console.log("Impossible to parse data! Reason:" + e);
@@ -41,7 +39,6 @@ app.get('/', function (req, res) {
     }
     try {
         var wb = XLSX.readFileSync(fname);
-        console.log("wb initial=", JSON.stringify(wb));
     } catch (e) {
         res.sendStatus(500);
         console.log("Impossible to create xlsx file! Reason:" + e);
@@ -52,7 +49,6 @@ app.get('/', function (req, res) {
     wb.SheetNames = [];
     wb.SheetNames.push('Sheet1');
     wb.Sheets['Sheet1'] = {
-        //'!ref': 'A1:',
         '!cols': worksheetColumns
     };
     for (var j = 0; j < columns.length; j++) {
@@ -66,19 +62,19 @@ app.get('/', function (req, res) {
     fillTableData(0, rows);
 
     function fillTableData(index, rows) {
-        console.log("fillTableData index, rows=", index, rows);
         if (!rows[index]) return;
         var rowData = rows[index];
-        console.log("rowData=", rowData);
         var lastCellInRaw;
         for (var i = 0; i < columns.length; i++) {
 
             var headerName=wb.Sheets['Sheet1'][XLSX.utils.encode_cell({c: i, r: 0})].v;
             var columnDataID;
+            var columnDataType;
             for(var k in columns){
                 var columnUnit=columns[k];
                 if(columnUnit.name==headerName){
                     columnDataID = columnUnit.data;  console.log("columnUnit.name, columnUnit.data=",columnUnit.name, columnUnit.data);
+                    columnDataType=getCellType(columnUnit);
                     break;
                 }
             }
@@ -86,7 +82,7 @@ app.get('/', function (req, res) {
             var currentCell = XLSX.utils.encode_cell({c: i, r: lineNum});
             lastCellInRaw=currentCell;
             wb.Sheets['Sheet1'][currentCell] = {
-                t: "s",
+                t: columnDataType,
                 v: displayValue
                 , s: {
                     font: {sz: "11", bold: false},
@@ -135,4 +131,10 @@ function getUIDNumber() {
         num += Math.pow(256, i) * str.charCodeAt(i);
     }
     return num;
+}
+
+function getCellType(columnData){
+    if(!columnData.type) return's';
+    if(columnData.type=="numeric") return'n';
+    else return's';
 }
